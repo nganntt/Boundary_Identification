@@ -1,0 +1,24 @@
+1. Command lines to run scenario
+--------------------------------
+# generate testcase and run it on beamNG, shape of road ('left_curve', 'right_curve', 'two_curve', 'straight')
+    python scenario.py <number of test case> <shape of the road>
+    python scenario.py 1 'left_curve'
+    
+
+2.Command lines to run active learning
+---------------------------------------
+Below are the commands to run function pool_base_sampling ( parameters can be modify in the main function 
+    num_pool, num_initial, num_query, road_shape , the name of testing data for the training model, select_strategy)
+
+#sampling with uncertaity method
+python activeLearning_GPC.py 1
+
+#sampling with random method
+python activeLearning_GPC.py 2
+
+
+#Draw learning curve to compare random method and uncertainty method
+python activeLearning_GPC.py 3
+
+#Draw the graph which compares error, nonErro, Accuracy of  random method and uncertainty method
+python activeLearning_GPC.py 4
