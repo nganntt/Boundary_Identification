@@ -4,7 +4,7 @@ from modAL.uncertainty import classifier_uncertainty
 from scenario import create_sample_AL, run_TC_on_BeamNG, str_to_beamNG_TcFormat
 from sklearn.gaussian_process.kernels import RBF
 from sklearn.gaussian_process import GaussianProcessClassifier
-from performance import compare_learning_curve_model, compare_performance, read_samples_from_queries
+from performance import compare_learning_curve_model, compare_performance
 import matplotlib.pyplot as plt
 import os
 import sys
@@ -248,8 +248,8 @@ def main(number_feature):
         sys_out.write_perfromance(performance_random, "Performance_Random")
 
     elif number_feature == '3':    # draw the learning curve
-        random_sample = read_samples_from_queries('Uncertainty_queries_10_16_2019__165759.cvs')
-        uncertainty_sample = read_samples_from_queries('Random_queries_10_16_2019__165836.cvs')
+        random_sample = sys_out.read_samples_from_queries('Uncertainty_queries_10_16_2019__165759.cvs')
+        uncertainty_sample = sys_out.read_samples_from_queries('Random_queries_10_16_2019__165836.cvs')
         compare_learning_curve_model(random_sample, uncertainty_sample)
 
     elif number_feature == '4':  # compare the number error of two model

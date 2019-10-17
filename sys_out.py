@@ -80,6 +80,18 @@ def write_perfromance(perf_list, file_name):
     df = df.set_axis(['NonError', 'Error', 'Accuracy'], axis=1, inplace=False)
     df.to_csv(file_name_cvs)
 
+def read_samples_from_queries(file):
+    '''
+       Read data of the performance after the sampling process
+       Data is saved in cvs file
+       '''
+    curr_dir = os.path.dirname(os.path.abspath(__file__))
+    store_dir = os.path.join(curr_dir, 'store')
+    file_name = file_name = os.path.join(store_dir, file)
+    df = pd.read_csv(file_name)
+    feature_col = ['Road_shape', 'speed', 'light', 'weather', 'result']
+    queries = df.loc[:, feature_col]
+    return queries.to_numpy()
 
 
 def summary (list_tc):

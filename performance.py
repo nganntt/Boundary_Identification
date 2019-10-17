@@ -4,9 +4,8 @@ from sklearn.model_selection import learning_curve
 from sklearn.gaussian_process.kernels import RBF
 from sklearn.gaussian_process import GaussianProcessClassifier
 import os
-from sys_out import warning
+from sys_out import warning, read_samples_from_queries
 import pandas as pd
-
 def plot_learning_curve(estimator, title, X, y, ylim=None, cv=None,
                         n_jobs=None, train_sizes=np.linspace(.1, 1.0, 5)):
     '''
@@ -146,18 +145,6 @@ def read_performance_sampling(file):
     perf = perf.to_numpy()
     return perf
 
-def read_samples_from_queries(file):
-    '''
-       Read data of the performance after the sampling process
-       Data is saved in cvs file
-       '''
-    curr_dir = os.path.dirname(os.path.abspath(__file__))
-    store_dir = os.path.join(curr_dir, 'store')
-    file_name = file_name = os.path.join(store_dir, file)
-    df = pd.read_csv(file_name)
-    feature_col = ['Road_shape', 'speed', 'light', 'weather', 'result']
-    queries = df.loc[:, feature_col]
-    return queries.to_numpy()
 
 
 
