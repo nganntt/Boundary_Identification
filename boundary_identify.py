@@ -2,14 +2,17 @@ from sklearn.model_selection import train_test_split
 from clustering import cluster_scenarios
 from scenario import gen_testcase
 from random import randint
-import numpy as np
+import sys
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.preprocessing import StandardScaler
 from sklearn.neighbors import NearestNeighbors
 #from association_rule import decode_testcase, convert_dataFrame, apriori_speed, rules_frequenItemsets
-from AR_speed_safe import decode_testcase, apriori_speed_rs, rules_frequenItemsets_rs
+from association_rule import apriori_speed_rs, rules_frequenItemsets_rs, decode_testcase_in_boundary_list
+from sys_out import read_samples_from_queries, convert_boundary_dataframe_normalize, convert_boundary_dataframe_beamNG
+from activeLearning_GPC import pool_base_sampling
+from clustering import cluster_scenarios, divide_subgroups
 
-EPSILON = 0.25
+EPSILON = 0.07
 
 
 def create_tmp_list_tc_testing(num_sampels, shape):
@@ -69,38 +72,101 @@ def find_boundary_bw_subclusters(labeled_testcase1, labeled_testcase2):
         #print ("distanc idx", boundary_distance_idx)
         if (len(boundary_distance_idx) != 0 ):
             for i in range(len(boundary_distance_idx)):
-                boundarys_pair = (item, X_train[boundary_distance_idx[i],:])
+                boundarys_pair = (*item, *X_train[boundary_distance_idx[i],:])
                 #print ("X train for nearest neighbor",X_train[boundary_distance_idx[i],:])
                 boundarys.append(boundarys_pair)
     return boundarys
 
 
-def find_boundary(sampling_list):
+def find_boundary_elements(labled_queries):
+    '''
+    Find the boundary from sampled which  which are collected in AL process
+    :param labled_queries: samples are labeled safe or unsafe
+    :return: a list of elements which located on the boundary
+    '''
+    mask_safe = (labled_queries[:, 4] == 1)
+    mask_unsafe = (labled_queries[:, 4] == 0)
+    safe_testcases = labled_queries[mask_safe]
+    unsafe_testcases = labled_queries[mask_unsafe]
+
+    # cluster safe and unsafe testcases into subgroups
+    X_safe_testcases = safe_testcases[:, :4]
+    X_unsafe_testcases = unsafe_testcases[:, :4]
+    sub_groups_safe, num_sub_group_safe = cluster_scenarios(X_safe_testcases)
+    sub_groups_unsafe, num_sub_group_unsafe = cluster_scenarios(X_unsafe_testcases)
+
+    subgroups_in_list_safe = divide_subgroups(sub_groups_safe, num_sub_group_safe)
+    subgroups_in_list_unsafe = divide_subgroups(sub_groups_unsafe, num_sub_group_unsafe)
+
+    boundary_list = list()
+    for i in range(num_sub_group_safe):
+        for j in range(num_sub_group_unsafe):
+            print("\n\n boundary subgroups %s safe and %s unsafe \n" % (i, j))
+            boundary_sub = find_boundary_bw_subclusters(subgroups_in_list_safe[i],
+                                                        subgroups_in_list_unsafe[j])
+            boundary_list = boundary_list + boundary_sub
+
+    return boundary_list
+
+
+def find_boundary_elements_twoWays(*args, online = None, sampling_list = None):
     '''
     identify the boundary from the samples which are collected in AL process
+    by online method or offiline (online = run sampling process, offline = get samples which
+    were sampled and save in the log file)
     :param sampling_list:
-    :return: a list of pair testcases which belongs the boundary
+    :return: a list of pair testcases (safe and unsafe) which belongs the boundary
     '''
-    pass
+    params_sampling = [arg for arg in args]
+    print (params_sampling)
+    boundary_list_safe_unsafe = list()
+    #finding the list of boundary elements
+    if online ==None:
+        #get testcases from sampling process with active learning
+        labled_queries = read_samples_from_queries('Uncertainty_queries_10_17_2019__024059.cvs')
+        boundary_list_safe_unsafe = find_boundary_elements(labled_queries)
+        #print("\n boundary list \n", boundary_list_safe_unsafe)
+        #print("\n boundary list shape \n", boundary_list_safe_unsafe.__len__())
 
-list_tc_1a = create_tmp_list_tc_testing(100, 'right_curve')
-list_tc_1b = create_tmp_list_tc_testing(100, 'right_curve')
-boundary1 = find_boundary_bw_subclusters(list_tc_1a, list_tc_1b)
-#boundary2 = find_boundary_bw_subclusters(list_tc_2a, list_tc_2b)
-#boundary3 = find_boundary_bw_subclusters(list_tc_3a, list_tc_3b)
-#boundary4 = find_boundary_bw_subclusters(list_tc_4a, list_tc_4b)
+    else:
+        #set parameter like this
+        # pool_base_sampling(1000, 3, 500, 'left_curve', 'normalize_left_curve.cvs', 'uncertainty')
+        sample_uncer, performance_uncer = pool_base_sampling(int(params_sampling[0]),
+                                                             int(params_sampling[1]), int(params_sampling[2]),
+                                                             params_sampling[3],
+                                                             params_sampling[4], params_sampling[5])
+        boundary_list_safe_unsafe = find_boundary_elements(sample_uncer)
 
-boundary = boundary1 #+ boundary2 + boundary3 + boundary4
-
-#print_boundary(boundary)
-
-dtc = decode_testcase(boundary)
-print("\n\n\n The boundary list:  \n")
-#print_boundary(dtc)
-
-frequent_items = apriori_speed_rs(dtc)
-rules_frequenItemsets_rs(frequent_items)
+    return boundary_list_safe_unsafe
 
 
 
+def main(*args, online=None):
+    boundary = list()
+    if online ==None:
+        boundary = find_boundary_elements_twoWays(online=None)
+        print_boundary(boundary)
 
+    else:
+        boundary = find_boundary_elements(*args, online='yes')
+        print_boundary(boundary)
+
+    convert_boundary_dataframe_normalize(boundary, "Boundary_testcases_norminalize_")
+    convert_boundary_dataframe_beamNG(boundary, "Boundary_testcases_beamnNG_")
+
+    # tc_encode_association_rule, testcaes_beamng = decode_testcase_in_boundary_list(boundary)
+    # frequent_items = apriori_speed_rs(tc_encode_association_rule)
+    # rules_frequenItemsets_rs(frequent_items)
+
+
+
+
+
+if __name__ == "__main__":
+    main(sys.argv[1])
+
+
+#find the boundary by running active learning to get samples data, then identify the boundary based on
+#found data. Command to run
+# The parameter in the command is the parameters to call pool_base_sampling function in activeLearning_GPC)
+# python boundary_identification 1000, 3, 500, 'left_curve', 'normalize_left_curve.cvs', 'uncertainty', online = 'yes'

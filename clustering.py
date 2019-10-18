@@ -9,21 +9,16 @@ from scenario import gen_testcase
 from random import randint
 import matplotlib.pyplot as plt
 
-def cluster_scenarios(normalize_tc_list, result_tc):
+def cluster_scenarios(X):
     '''
     Cluster testcases in safe or unsafe group into subgroups
     :param normalize_tc_list:  feature of the testcases (X)
     :param result_tc: result of testcase
     :return: subgroups of testcases which have similar features
     '''
-    X = np.asarray(normalize_tc_list)
-    y = result_tc
-    
+
     # #############################################################################
-    # Generate sample data
-    # centers = [[1, 1], [-1, -1], [1, -1], [-1,1]]
-    # X, labels_true = make_blobs(n_samples=750, centers=centers, cluster_std=0.4,
-                                # random_state=0)
+
     X_tranform = StandardScaler().fit_transform(X) # data already normalize
 
     # #############################################################################
@@ -50,11 +45,17 @@ def cluster_scenarios(normalize_tc_list, result_tc):
         clusters_dbResults.append(tmp)
         
     clusters_dbResults = np.concatenate(clusters_dbResults)
+    num_group = clusters_dbResults.shape[1]
     print('Estimated number of clusters: %d' % n_clusters_)
     print('Estimated number of noise points: %d' % n_noise_)
     print("Silhouette Coefficient: %0.5f"
           % metrics.silhouette_score(X, labels))
+    return clusters_dbResults, num_group
 
-    return clusters_dbResults
-
-
+def divide_subgroups(clusters, num_subgroup):
+    sub_groups = list()
+    for i in range(num_subgroup):
+        mask_subgroup = (clusters[:,4] ==i)
+        subgroup = clusters[mask_subgroup]
+        sub_groups.append(subgroup)
+    return sub_groups

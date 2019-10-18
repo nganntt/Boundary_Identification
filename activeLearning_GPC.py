@@ -248,14 +248,14 @@ def main(number_feature):
         sys_out.write_perfromance(performance_random, "Performance_Random")
 
     elif number_feature == '3':    # draw the learning curve
-        random_sample = sys_out.read_samples_from_queries('Uncertainty_queries_10_16_2019__165759.cvs')
-        uncertainty_sample = sys_out.read_samples_from_queries('Random_queries_10_16_2019__165836.cvs')
+        random_sample = sys_out.read_samples_from_queries('Uncertainty_queries_10_17_2019__024059.cvs')
+        uncertainty_sample = sys_out.read_samples_from_queries('Random_queries_10_18_2019__024906.cvs')
         compare_learning_curve_model(random_sample, uncertainty_sample)
 
     elif number_feature == '4':  # compare the number error of two model
         # ,NonError,Error,Accuracy are type of the graph which we would like to show
-        random_perf_file = 'Performance_Random_10_16_2019__163921.cvs'
-        uncer_perf_file = 'performance_uncertainty_10_16_2019__163842.cvs'
+        random_perf_file = 'Performance_Random_10_18_2019__024906.cvs'
+        uncer_perf_file = 'performance_uncertainty_10_17_2019__024059.cvs'
         compare_performance(random_perf_file, uncer_perf_file,"Error")
         compare_performance(random_perf_file, uncer_perf_file, "NonError")
         compare_performance(random_perf_file, uncer_perf_file, "Accuracy")

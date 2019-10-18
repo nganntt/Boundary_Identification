@@ -99,72 +99,67 @@ def conv_TOD(tod):
         conv_value = 'light_strong'
     return conv_value
 
-def decode_testcase(boundary_tc):
+def decode_testcase_in_boundary_list(boundary_tc):
     """
     decode testcase from a list tuples of testcase normalized
     normalize_tc = (shape_road_nl, speed_car, light, weather_nl)
     ex:  np.array([0.6,     0.565 ,   0.56521739,     0.35])
     """
-    testcases = list()
-    for tc in boundary_tc:
-        print ("\n testcase inside for", tc)
-        road_shape1 = tc[0][0]
-        road_shape2 = tc[1][0]
-        speed1      = tc[0][1]
-        speed2      = tc[1][1]
-        light1      = tc[0][2]
-        light2      = tc[1][2]
-        weather1    = tc[0][3]
-        weather2    = tc[1][3]
-        
-        
-        
-        
+    testcases_association_rule = list()
+    beamNG_list = list()
+    for i in range(len(boundary_tc)) :
+        road_shape1 = boundary_tc[i][0]
+        speed1      = boundary_tc[i][1]
+        light1      = boundary_tc[i][2]
+        weather1    = boundary_tc[i][3]
+        road_shape2 = boundary_tc[i][4]
+        speed2      = boundary_tc[i][5]
+        light2      = boundary_tc[i][6]
+        weather2    = boundary_tc[i][7]
+
         # convert road_shape
         road_shape1_str = ""
         road_shape2_str = ""
-        for key, value in ROAD_SHAPE.items():    
+        for key, value in ROAD_SHAPE.items():
             if value == road_shape1:
                 road_shape1_str = key
             if value == road_shape2:
                 road_shape2_str = key
-    
-       
+
         # convert light
         light1_str = conv_TOD(light1)
         light2_str = conv_TOD(light2)
-        
-        # for key, value in TIMEOFDAY.items():    
+
+        # for key, value in TIMEOFDAY.items():
             # if value == round(light1,1):
                 # light1_str = key
             # if value == round(light2,1):
                 # light2_str = key
-    
+
          # convert weather
         weather1_str = ""
         weather2_str = ""
-        for key, value in WEAHTER.items():    
+        for key, value in WEAHTER.items():
             if value == weather1:
                 weather1_str = key
             if value == weather2:
                 weather2_str = key
-    
+
         #conver to km/h
-        # speed1_km = round(speed1 * 200 *5/18 *3.6, 2 ) #normalize divide for 200 in scenarios
-        # speed2_km = round(speed2 * 200 *5/18 *3.6, 2)
-        speed1_km = encode_speed(ceil(speed1 * 200 *5/18 *3.6))#normalize divide for 200 in scenarios
-        speed2_km = encode_speed(ceil(speed2 * 200 *5/18 *3.6))
-        
+        # speed1_km = round(speed1 * 170 *5/18 *3.6, 2 ) #normalize divide for 170 in scenarios
+        # speed2_km = round(speed2 * 170*5/18 *3.6, 2)
+        speed1_km = encode_speed(ceil(speed1 * 170 *5/18 *3.6))#normalize divide for 170 in scenarios
+        speed2_km = encode_speed(ceil(speed2 * 170 *5/18 *3.6))
+
         state1 = 'safe'
         state2 = 'unsafe'
         tc1 = np.array([road_shape1_str, speed1_km, light1_str, weather1_str, state1])
         tc2 = np.array([road_shape2_str, speed2_km, light2_str, weather2_str, state2])
-        print("\n tc1", tc1)
-        print("\n tc2", tc2)
-        testcases.append(tc1)
-        testcases.append(tc2)
-    return testcases
-    
+        beamNG_list.append([*tc1,*tc2])
+        testcases_association_rule.append(tc1)
+        testcases_association_rule.append(tc2)
+    return testcases_association_rule, beamNG_list
+
 
 
 #1, ['left_curve' 'speed_bw_140_160' 'light_weak' 'cloudy_evening']
@@ -193,8 +188,6 @@ def convert_dataFrame_rs(testcases):
  
     one_hot_data_state = pd.get_dummies(dfObj['state'])
     one_hot_data_speed = pd.get_dummies(dfObj['speed'])
-    
-    
     print("\n safe and unsafe \n", one_hot_data_state)
     
     #data has format
@@ -229,7 +222,7 @@ def apriori_speed_rs (dataset):
     return frequent_itemsets
 
 def rules_frequenItemsets_rs(frequent_itemsets):
-    rules = association_rules(frequent_itemsets, metric="confidence", min_threshold=0.001)
+    rules = association_rules(frequent_itemsets, metric="confidence", min_threshold=0.2)
     #rules = association_rules(frequent_itemsets, metric="lift", min_threshold=1.2)
     print ("Rule", rules)
  
