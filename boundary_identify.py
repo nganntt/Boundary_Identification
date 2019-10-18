@@ -154,13 +154,9 @@ def main(*args, online=None):
     convert_boundary_dataframe_normalize(boundary, "Boundary_testcases_norminalize_")
     convert_boundary_dataframe_beamNG(boundary, "Boundary_testcases_beamnNG_")
 
-    # tc_encode_association_rule, testcaes_beamng = decode_testcase_in_boundary_list(boundary)
-    # frequent_items = apriori_speed_rs(tc_encode_association_rule)
-    # rules_frequenItemsets_rs(frequent_items)
-
-
-
-
+    tc_encode_association_rule, testcaes_beamng = decode_testcase_in_boundary_list(boundary)
+    frequent_items = apriori_speed_rs(tc_encode_association_rule)
+    rules_frequenItemsets_rs(frequent_items)
 
 if __name__ == "__main__":
     main(sys.argv[1])

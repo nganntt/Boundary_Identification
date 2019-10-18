@@ -81,7 +81,8 @@ def update_mode_AL(learner, X_pool, X_pool_bng, X_test, y_test, budget):
     queries = list()
     count = 0
     N_BUDGET = budget
-    while model_accuracy < 0.90 and count < N_BUDGET:
+    #while model_accuracy < 0.90 and count < N_BUDGET:
+    while count < N_BUDGET:
         count = count + 1
         query_idx, query_instance = learner.query(X_pool)
         query_idx = int(query_idx)
