@@ -2,7 +2,7 @@
 
 The project is to find the boundary of testcases for testing self-driving car. 
 The scope of the topic is searching based software.
-Each testcase has parameter (road shape, speed of car, light, weather condition)
+Each testcase has parameters (road shape, speed of car, light, weather condition)
 
 The first step is sampling testcase to choose the testcases that potentially identify the boundary. 
 The boundary of the testcases separates safe testcases from unsafe testcases.
