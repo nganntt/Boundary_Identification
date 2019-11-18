@@ -1,6 +1,6 @@
 # Boundary Identification
 
-The project is to find the boundary of testcases for testing self-driving car
+The project is to find the boundary of testcases for testing self-driving car. 
 The scope of the topic is searching based software.
 Each testcase has parameter (road shape, speed of car, light, weather condition)
 
